@@ -1,7 +1,6 @@
 package com.searcher.main;
 
 
-import java.io.File;
 import java.util.HashMap;
 
 import org.junit.Assert;
@@ -9,10 +8,17 @@ import org.junit.Test;
 
 import com.searcher.main.Searcher;
 import com.searcher.utils.CSVReader;
+import com.searcher.utils.Config;
 
 public class SearcherTest {
 
 
+	private static final Object ADULT = "adult";
+	private static final Object CHILD = "child";
+
+	static SearcherTest csvreader = new SearcherTest();
+	static ClassLoader classLoader = csvreader.getClass().getClassLoader();
+	
 	@Test
 	public void testSearch1() {
 		HashMap<String,Double> mapExpected = new HashMap<String,Double>();
@@ -59,9 +65,6 @@ public class SearcherTest {
 	
 	@Test
 	public void testGetInfantPrice() throws Exception{
-		File inputFile = new File("./resources/infant_prices.csv");
-	    Assert.assertTrue(inputFile.exists());
-	    Assert.assertTrue(inputFile.length()>0);
 	    Assert.assertEquals(10.00, Searcher.getInfantPrice("IB"),0.00);
 	    Assert.assertEquals(15.00, Searcher.getInfantPrice("BA"),0.00);
 	    Assert.assertEquals(7.00, Searcher.getInfantPrice("LH"),0.00);
@@ -73,9 +76,6 @@ public class SearcherTest {
 	
 	@Test
 	public void testGetIATACode() throws Exception{
-		File inputFile = new File("./resources/airports.csv");
-	    Assert.assertTrue(inputFile.exists());
-	    Assert.assertTrue(inputFile.length()>0);
 	    Assert.assertEquals("MAD", Searcher.getIATACode("Madrid"));
 	    Assert.assertEquals("BCN", Searcher.getIATACode("Barcelona"));
 	    Assert.assertEquals("LHR", Searcher.getIATACode("London"));
@@ -89,9 +89,6 @@ public class SearcherTest {
 	
 	@Test
 	public void testGetDaysFactor() throws Exception{
-		File inputFile = new File("./resources/percentages_of_base_price.csv");
-	    Assert.assertTrue(inputFile.exists());
-	    Assert.assertTrue(inputFile.length()>0);
 	    Assert.assertEquals(1.50, Searcher.getDaysFactor(0),0.00);
 	    Assert.assertEquals(1.50, Searcher.getDaysFactor(2),0.00);
 	    Assert.assertEquals(1.20, Searcher.getDaysFactor(3),0.00);
@@ -105,18 +102,29 @@ public class SearcherTest {
 	
 	@Test
 	public void testGetTotalPrice() throws Exception{
-		File inputFile = new File("./resources/discounts_by_passenger_type.csv");
-	    Assert.assertTrue(inputFile.exists());
-	    Assert.assertTrue(inputFile.length()>0);
 	    
 	    HashMap<Object,Object> discounts = (HashMap<Object, Object>) CSVReader
-				.readCsvFile(
-						"./resources/discounts_by_passenger_type.csv");
-	    Assert.assertTrue(discounts.get("adult")!=null&&Double.valueOf(discounts.get("adult").toString())>=0);
-	    Assert.assertTrue(discounts.get("child")!=null&&Double.valueOf(discounts.get("child").toString())>=0);
+				.readCsvFile(Config.getInstance().getDiscountsByPassengerTypeFileName());
+	    Assert.assertTrue(discounts.get(ADULT)!=null&&Double.valueOf(discounts.get(ADULT).toString())>=0);
+	    Assert.assertTrue(discounts.get(CHILD)!=null&&Double.valueOf(discounts.get(CHILD).toString())>=0);
 	    Assert.assertEquals(10.0, Searcher.getTotalPrice(295.00,0,0,1,0,"IB"),0.00);
 	    Assert.assertEquals(10.0, Searcher.getTotalPrice(295.00,0,0,1,50,"IB"),0.00);
 
 		
 	}
+	
+	@Test
+	public void testGetAirlineCode() throws Exception{
+	    Assert.assertTrue("TK".equals(Searcher.getAirlineCode("TK2372")));
+	    Assert.assertTrue("LH".equals(Searcher.getAirlineCode("LH5909")));
+	    Assert.assertTrue("IB".equals(Searcher.getAirlineCode("IB2171")));
+	    Assert.assertTrue("U2".equals(Searcher.getAirlineCode("U23631")));
+	    Assert.assertTrue("FR".equals(Searcher.getAirlineCode("FR7521")));
+	    Assert.assertTrue("VY".equals(Searcher.getAirlineCode("VY4335")));
+	    Assert.assertTrue("BA".equals(Searcher.getAirlineCode("BA1164")));
+
+		
+	}
+
+
 }
